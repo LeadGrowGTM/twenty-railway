@@ -1,0 +1,254 @@
+{
+  "buckets": {
+    "9c32bd99-7f6c-4d46-a8b1-6db6b4fade13": {
+      "name": "twenty-files"
+    }
+  },
+  "services": {
+    "285d6899-ca3a-4b2f-96f5-3970ab15f7fb": {
+      "deploy": {
+        "healthcheckPath": null,
+        "restartPolicyMaxRetries": 10,
+        "restartPolicyType": "ON_FAILURE",
+        "startCommand": "yarn worker:prod"
+      },
+      "icon": null,
+      "name": "twenty-worker",
+      "source": {
+        "image": "twentycrm/twenty:v2.49.0"
+      },
+      "variables": {
+        "DISABLE_CRON_JOBS_REGISTRATION": {
+          "isOptional": false,
+          "defaultValue": "true"
+        },
+        "DISABLE_DB_MIGRATIONS": {
+          "isOptional": false,
+          "defaultValue": "true"
+        },
+        "ENCRYPTION_KEY": {
+          "defaultValue": "${{twenty.ENCRYPTION_KEY}}",
+          "isOptional": false
+        },
+        "PG_DATABASE_URL": {
+          "defaultValue": "${{Postgres.DATABASE_URL}}",
+          "isOptional": false
+        },
+        "REDIS_URL": {
+          "defaultValue": "${{Redis.REDIS_URL}}",
+          "isOptional": false
+        },
+        "SERVER_URL": {
+          "defaultValue": "https://${{twenty.RAILWAY_PUBLIC_DOMAIN}}",
+          "isOptional": false
+        },
+        "STORAGE_S3_ACCESS_KEY_ID": {
+          "defaultValue": "${{twenty-files.ACCESS_KEY_ID}}",
+          "isOptional": false
+        },
+        "STORAGE_S3_ENDPOINT": {
+          "defaultValue": "${{twenty-files.ENDPOINT}}",
+          "isOptional": false
+        },
+        "STORAGE_S3_NAME": {
+          "defaultValue": "${{twenty-files.BUCKET}}",
+          "isOptional": false
+        },
+        "STORAGE_S3_REGION": {
+          "isOptional": false,
+          "defaultValue": "auto"
+        },
+        "STORAGE_S3_SECRET_ACCESS_KEY": {
+          "defaultValue": "${{twenty-files.SECRET_ACCESS_KEY}}",
+          "isOptional": false
+        },
+        "STORAGE_TYPE": {
+          "isOptional": false,
+          "defaultValue": "s3"
+        }
+      }
+    },
+    "2d484f18-78c7-4c82-8bda-5cb9a596e796": {
+      "deploy": {
+        "healthcheckPath": null,
+        "restartPolicyMaxRetries": 10,
+        "restartPolicyType": "ON_FAILURE",
+        "startCommand": "/bin/sh -c \"rm -rf $RAILWAY_VOLUME_MOUNT_PATH/lost+found/ && exec docker-entrypoint.sh redis-server --requirepass $REDIS_PASSWORD --save 60 1 --dir $RAILWAY_VOLUME_MOUNT_PATH --maxmemory-policy noeviction\""
+      },
+      "icon": "https://cdn.sanity.io/images/sy1jschh/production/0ce0bfdcfbdbf69662b1116671f97c2dd788b655-157x157.svg",
+      "name": "Redis",
+      "source": {
+        "image": "redis:8.2"
+      },
+      "variables": {
+        "REDISHOST": {
+          "defaultValue": "${{RAILWAY_PRIVATE_DOMAIN}}",
+          "isOptional": false
+        },
+        "REDISPASSWORD": {
+          "defaultValue": "${{REDIS_PASSWORD}}",
+          "isOptional": false
+        },
+        "REDISPORT": {
+          "isOptional": false,
+          "defaultValue": "6379"
+        },
+        "REDISUSER": {
+          "isOptional": false,
+          "defaultValue": "default"
+        },
+        "REDIS_PASSWORD": {
+          "defaultValue": "${{ secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\") }}",
+          "isOptional": false
+        },
+        "REDIS_URL": {
+          "defaultValue": "redis://${{REDISUSER}}:${{REDIS_PASSWORD}}@${{REDISHOST}}:${{REDISPORT}}",
+          "isOptional": false
+        }
+      },
+      "volumeMounts": {
+        "2d484f18-78c7-4c82-8bda-5cb9a596e796": {
+          "mountPath": "/data"
+        }
+      }
+    },
+    "31458e04-264b-4155-88d3-f18eb48ba49d": {
+      "deploy": {
+        "healthcheckPath": "/healthz",
+        "restartPolicyMaxRetries": 10,
+        "restartPolicyType": "ON_FAILURE",
+        "startCommand": null
+      },
+      "icon": null,
+      "name": "twenty",
+      "networking": {
+        "serviceDomains": {
+          "<hasDomain>:3000": {
+            "port": 3000
+          }
+        }
+      },
+      "source": {
+        "image": "twentycrm/twenty:v2.49.0"
+      },
+      "variables": {
+        "ENCRYPTION_KEY": {
+          "isOptional": false,
+          "defaultValue": "${{ secret(48) }}"
+        },
+        "NODE_PORT": {
+          "isOptional": false,
+          "defaultValue": "3000"
+        },
+        "PG_DATABASE_URL": {
+          "defaultValue": "${{Postgres.DATABASE_URL}}",
+          "isOptional": false
+        },
+        "PORT": {
+          "isOptional": false,
+          "defaultValue": "3000"
+        },
+        "REDIS_URL": {
+          "defaultValue": "${{Redis.REDIS_URL}}",
+          "isOptional": false
+        },
+        "SERVER_URL": {
+          "defaultValue": "https://${{RAILWAY_PUBLIC_DOMAIN}}",
+          "isOptional": false
+        },
+        "STORAGE_S3_ACCESS_KEY_ID": {
+          "defaultValue": "${{twenty-files.ACCESS_KEY_ID}}",
+          "isOptional": false
+        },
+        "STORAGE_S3_ENDPOINT": {
+          "defaultValue": "${{twenty-files.ENDPOINT}}",
+          "isOptional": false
+        },
+        "STORAGE_S3_NAME": {
+          "defaultValue": "${{twenty-files.BUCKET}}",
+          "isOptional": false
+        },
+        "STORAGE_S3_REGION": {
+          "isOptional": false,
+          "defaultValue": "auto"
+        },
+        "STORAGE_S3_SECRET_ACCESS_KEY": {
+          "defaultValue": "${{twenty-files.SECRET_ACCESS_KEY}}",
+          "isOptional": false
+        },
+        "STORAGE_TYPE": {
+          "isOptional": false,
+          "defaultValue": "s3"
+        }
+      }
+    },
+    "5a92cf6a-f002-4387-9f9f-f970a1cd0b3b": {
+      "deploy": {
+        "healthcheckPath": null,
+        "restartPolicyMaxRetries": 10,
+        "restartPolicyType": "ON_FAILURE",
+        "startCommand": null
+      },
+      "icon": "https://devicons.railway.app/i/postgresql.svg",
+      "name": "Postgres",
+      "source": {
+        "image": "ghcr.io/railwayapp-templates/postgres-ssl:18"
+      },
+      "variables": {
+        "DATABASE_URL": {
+          "defaultValue": "postgresql://${{PGUSER}}:${{POSTGRES_PASSWORD}}@${{RAILWAY_PRIVATE_DOMAIN}}:5432/${{PGDATABASE}}",
+          "isOptional": false
+        },
+        "PGDATA": {
+          "isOptional": false,
+          "defaultValue": "/var/lib/postgresql/data/pgdata"
+        },
+        "PGDATABASE": {
+          "defaultValue": "${{POSTGRES_DB}}",
+          "isOptional": false
+        },
+        "PGHOST": {
+          "defaultValue": "${{RAILWAY_PRIVATE_DOMAIN}}",
+          "isOptional": false
+        },
+        "PGPASSWORD": {
+          "defaultValue": "${{POSTGRES_PASSWORD}}",
+          "isOptional": false
+        },
+        "PGPORT": {
+          "isOptional": false,
+          "defaultValue": "5432"
+        },
+        "PGUSER": {
+          "defaultValue": "${{POSTGRES_USER}}",
+          "isOptional": false
+        },
+        "POSTGRES_DB": {
+          "isOptional": false,
+          "defaultValue": "railway"
+        },
+        "POSTGRES_PASSWORD": {
+          "defaultValue": "${{ secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\") }}",
+          "isOptional": false
+        },
+        "POSTGRES_USER": {
+          "isOptional": false,
+          "defaultValue": "postgres"
+        },
+        "RAILWAY_DEPLOYMENT_DRAINING_SECONDS": {
+          "isOptional": false,
+          "defaultValue": "60"
+        },
+        "SSL_CERT_DAYS": {
+          "isOptional": false,
+          "defaultValue": "820"
+        }
+      },
+      "volumeMounts": {
+        "5a92cf6a-f002-4387-9f9f-f970a1cd0b3b": {
+          "mountPath": "/var/lib/postgresql/data"
+        }
+      }
+    }
+  }
+}
