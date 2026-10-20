@@ -1,50 +1,45 @@
 # Twenty CRM on Railway
 
-One command deploys a fresh [Twenty CRM](https://github.com/twentyhq/twenty) as its own Railway project: the Twenty app, a background worker, Postgres, Redis and a Railway storage bucket for file uploads.
+A real one-click setup for [Twenty](https://github.com/twentyhq/twenty), the open-source CRM. One click gives a complete, production-ready stack on Railway: the app, a background worker, Postgres, Redis and file storage, all wired together with secrets generated per deploy.
 
-No custom Dockerfile. It runs Twenty's official image, `twentycrm/twenty:v2.49.0`.
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/LHKATe?utm_medium=integration&utm_source=button&utm_campaign=twenty-crm)
+
+## What's in the box
+
+| Service | Role |
+|---|---|
+| `twenty` | Twenty web app (official `twentycrm/twenty:v2.49.0` image) on a public HTTPS domain, with a health check |
+| `twenty-worker` | Background jobs: email and calendar sync, workflows, imports |
+| `Postgres` | Database on a persistent volume, private network only |
+| `Redis` | Job queue and cache on a persistent volume, private network only |
+| `twenty-files` | Railway Storage Bucket for attachments and uploads |
+
+Nothing to fill in. Database and Redis passwords and Twenty's encryption key are generated fresh for every deploy, and the services find each other through Railway references. The first boot sets up the database by itself (about 5 minutes).
 
 ## Deploy
 
-You need the [Railway CLI](https://docs.railway.com/cli), logged in (`railway login`), plus `python3` and `curl`.
+**One click:** press the button above.
+
+**From the terminal** (same template, handy for spinning up one copy per client):
 
 ```bash
 git clone https://github.com/LeadGrowGTM/twenty-railway && cd twenty-railway
-./deploy.sh "Twenty CRM - <client>"              # uses your default workspace
-./deploy.sh "Twenty CRM - <client>" <workspace>  # or pick one (ID or name)
+./deploy.sh "Twenty CRM - Acme"
 ```
 
-The script prints the project link, then waits until the app answers (first boot sets up the database, about 5 minutes) and prints the URL.
-
-**The first person to sign up becomes the workspace admin.** Sign up straight away.
-
-## What gets created
-
-| Service | What it is |
-|---|---|
-| `twenty` | The web app, with a public `*.up.railway.app` domain and a `/healthz` health check |
-| `twenty-worker` | Background jobs (`yarn worker:prod`). It skips migrations and cron registration, which the app does |
-| `Postgres` | Database, with a volume |
-| `Redis` | Job queue, with a volume, run with `--maxmemory-policy noeviction` as Twenty requires |
-| `twenty-files` | Railway bucket. Uploads go here because the app and worker can't share a disk on Railway |
-
-Secrets are generated per deploy: Postgres and Redis passwords, and Twenty's `ENCRYPTION_KEY` (the worker references the app's key). Bucket keys are Railway references. `twenty.template.json` holds no secret values.
-
-Rough cost: $15-30 a month per copy.
-
-## Why not just deploy the image by hand
-
-Twenty's first boot sets up the database. If `SERVER_URL` is empty at that point (the public domain doesn't exist yet), setup crashes after creating an empty `core` schema, and every later boot sees that schema and skips setup. The homepage then shows "Unable to load Twenty" (503) and the logs say `relation "core.workspace" does not exist`.
-
-This template creates the domain in the same call as the services, so `SERVER_URL` is set on the first boot. To fix an instance that already hit the problem (only while it holds no data): `drop schema core;` on its database, then redeploy `twenty`.
+Needs the [Railway CLI](https://docs.railway.com/cli) (logged in), `python3` and `curl`. The script prints the URL once Twenty is up.
 
 ## After deploy
 
-- **Custom domain:** add it to the `twenty` service in Railway, then set `SERVER_URL=https://<your domain>` on `twenty` (the worker follows it) and redeploy.
-- **Email, Google or Microsoft sign-in:** see Twenty's [self-hosting docs](https://twenty.com/developers/section/self-hosting) for the variables, and set them on both `twenty` and `twenty-worker`.
-- **Upgrade:** change the image tag on both `twenty` and `twenty-worker` (and in `twenty.template.json`). Migrations run when the app boots.
+- **Sign up right away.** The first account becomes the admin of the instance.
+- **Custom domain:** add it to the `twenty` service, set `SERVER_URL=https://<domain>` on `twenty` (the worker follows), redeploy.
+- **Email, Google or Microsoft sign-in and sync:** add the variables from Twenty's [self-hosting docs](https://twenty.com/developers/section/self-hosting) to both `twenty` and `twenty-worker`.
+- **Upgrade:** bump the image tag on `twenty` and `twenty-worker`. Migrations run on boot.
+
+Typical cost: $15-30 a month per instance.
 
 ## Files
 
-- `twenty.template.json`: the Railway template config (services, variables, volumes, bucket, domain).
-- `deploy.sh`: creates the project and deploys the config in one call (`templateDeployV2`). `TWENTY_TEMPLATE_ID` overrides the Railway template it's attached to.
+- `twenty.template.json`: the Railway template config (services, variables, volumes, bucket, domain). No secret values.
+- `deploy.sh`: creates a project and deploys that config in one call.
+- `railway-overview.md`: the marketplace listing text.
