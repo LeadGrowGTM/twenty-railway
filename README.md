@@ -2,7 +2,7 @@
 
 A real one-click setup for [Twenty](https://github.com/twentyhq/twenty), the open-source CRM. One click gives a complete, production-ready stack on Railway: the app, a background worker, Postgres, Redis and file storage, all wired together with secrets generated per deploy.
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/LHKATe?utm_medium=integration&utm_source=button&utm_campaign=twenty-crm)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/twenty-crm-1?utm_medium=integration&utm_source=button&utm_campaign=twenty-crm)
 
 ## What's in the box
 
